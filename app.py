@@ -33,7 +33,7 @@ with col_titulo:
 
 st.divider()
 
-# 3. KPIs USDA
+# 3. KPIs GLOBALES (USDA)
 k1, k2, k3, k4 = st.columns(4)
 with k1: st.metric("Stocks Globales (USDA)", "1.35M TM", "-4.2%")
 with k2: st.metric("Consumo Mundial", "4.85M TM", "+1.8%")
@@ -66,46 +66,52 @@ with col_fut:
     df_venc = pd.DataFrame(vencimientos)
     fig_venc = px.line(df_venc, x='Mes Vencimiento', y='Precio Proyectado', 
                        markers=True, text='Precio Proyectado')
-    fig_venc.update_traces(
-        line=dict(color='#7e3412', width=4),
-        marker=dict(size=10, color='#d35400'),
-        textposition="top center"
-    )
+    fig_venc.update_traces(line=dict(color='#7e3412', width=4), marker=dict(size=10, color='#d35400'), textposition="top center")
     fig_venc.update_layout(xaxis_title="Vencimientos Futuros", yaxis_title="Precio (USD/MT)")
     st.plotly_chart(fig_venc, use_container_width=True)
 
 st.divider()
 
-# 5. MAPA Y EXPORTACIONES
-col_map, col_bar = st.columns([2, 1])
+# 5. PRODUCCIÓN, EXPORTACIÓN Y STOCKS (PRODUCTORES)
+col_prod, col_stock_p = st.columns([2, 1])
 
-df_paises = pd.DataFrame({
+df_productores = pd.DataFrame({
     'ISO': ['CIV', 'GHA', 'IDN', 'NGA', 'CMR', 'BRA', 'ECU'],
     'País': ['Costa de Marfil', 'Ghana', 'Indonesia', 'Nigeria', 'Camerún', 'Brasil', 'Ecuador'],
     'Producción': [2100000, 800000, 650000, 300000, 280000, 200000, 150000],
-    'Exportación': [1650000, 620000, 410000, 210000, 190000, 10000, 145000]
+    'Stocks_MT': [450000, 180000, 120000, 65000, 55000, 40000, 35000]
 })
 
-with col_map:
-    st.subheader("📍 Producción Mundial por País (TM)")
-    fig_map = px.choropleth(df_paises, locations="ISO", color="Producción", color_continuous_scale="Oranges")
+with col_prod:
+    st.subheader("📍 Producción Mundial y Geografía")
+    fig_map = px.choropleth(df_productores, locations="ISO", color="Producción", color_continuous_scale="Oranges")
     fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=350)
     st.plotly_chart(fig_map, use_container_width=True)
 
-with col_bar:
-    titulo_con_icono("Exportaciones.PNG", "Exportaciones (TM)")
-    df_exp_sorted = df_paises.sort_values('Exportación')
-    fig_exp = px.bar(df_exp_sorted, x='Exportación', y='País', orientation='h', color_discrete_sequence=['#7e3412'])
-    st.plotly_chart(fig_exp, use_container_width=True)
+with col_stock_p:
+    st.subheader("📦 Stocks en Origen (MT)")
+    fig_stock_p = px.bar(df_productores.sort_values('Stocks_MT'), x='Stocks_MT', y='País', orientation='h', color_discrete_sequence=['#a04000'])
+    st.plotly_chart(fig_stock_p, use_container_width=True)
 
-# 6. IMPORTADORES
 st.divider()
-titulo_con_icono("Principales Importadores.PNG", "Principales Importadores Globales (TM)")
 
-df_imp = pd.DataFrame({
-    'País': ['Países Bajos', 'EE.UU.', 'Alemania', 'Bélgica', 'Malasia', 'España'],
-    'TM': [750000, 680000, 520000, 310000, 290000, 85000]
-}).sort_values('TM', ascending=True)
+# 6. CONSUMO E IMPORTACIÓN
+col_cons, col_imp = st.columns(2)
 
-fig_imp = px.bar(df_imp, x='TM', y='País', orientation='h', color='TM', color_continuous_scale='Oranges', text_auto='.2s')
-st.plotly_chart(fig_imp, use_container_width=True)
+with col_cons:
+    st.subheader("☕ Principales Países Consumidores (MT)")
+    df_consumo = pd.DataFrame({
+        'País': ['EE.UU.', 'Alemania', 'Francia', 'Reino Unido', 'Bélgica', 'Suiza', 'España'],
+        'Consumo_MT': [795000, 380000, 245000, 210000, 185000, 110000, 88000]
+    }).sort_values('Consumo_MT', ascending=True)
+    fig_cons = px.bar(df_consumo, x='Consumo_MT', y='País', orientation='h', color='Consumo_MT', color_continuous_scale='YlOrBr')
+    st.plotly_chart(fig_cons, use_container_width=True)
+
+with col_imp:
+    titulo_con_icono("Principales Importadores.PNG", "Principales Importadores Globales (MT)")
+    df_imp = pd.DataFrame({
+        'País': ['Países Bajos', 'EE.UU.', 'Alemania', 'Bélgica', 'Malasia', 'España'],
+        'TM': [750000, 680000, 520000, 310000, 290000, 85000]
+    }).sort_values('TM', ascending=True)
+    fig_imp = px.bar(df_imp, x='TM', y='País', orientation='h', color='TM', color_continuous_scale='Oranges', text_auto='.2s')
+    st.plotly_chart(fig_imp, use_container_width=True)
