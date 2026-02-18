@@ -2,67 +2,73 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
+import base64
 
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(layout="wide", page_title="Cacao Pulse 360", page_icon="🍫")
 
-# Estilos CSS corregidos para integrar Logo + Título Gigante
+# Estilos CSS para alineación vertical y central absoluta
 st.markdown("""
     <style>
-    /* Eliminar espacios vacíos superiores */
+    /* Reset de espacios */
     .block-container {
-        padding-top: 1.5rem;
+        padding-top: 1rem;
         padding-bottom: 0rem;
     }
     
-    /* Contenedor principal de marca */
-    .brand-container {
-        text-align: center;
+    /* Contenedor Maestro Centrado */
+    .main-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        margin-bottom: 20px;
+        text-align: center;
+        margin-bottom: 30px;
     }
 
-    .logo-img {
-        max-width: 180px;
-        margin-bottom: 10px;
+    .logo-container {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 200px; /* Tamaño del logo */
     }
 
     .titulo-gigante {
         color: #800000;
-        font-size: clamp(40px, 8vw, 90px); /* Tamaño grande y responsivo */
+        font-size: clamp(45px, 7.5vw, 95px);
         font-weight: 800;
-        margin: 0;
-        padding: 0;
+        margin: 15px 0 5px 0;
         line-height: 1;
         letter-spacing: -2px;
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        text-transform: uppercase;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .subtitulo-inteligencia {
         color: #555555;
-        font-size: 18px;
-        font-weight: 600;
-        margin-top: 10px;
-        letter-spacing: 3px;
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-top: 0;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. SECCIÓN DE ENCABEDAZO (LOGO + TÍTULO)
-# Verificamos si el logo existe para mostrarlo vía HTML centrado
+# 2. SECCIÓN DE ENCABEZADO (LOGO + TÍTULO)
 nombre_logo = "logo_corona_bp.png"
 logo_html = ""
+
 if os.path.exists(nombre_logo):
-    import base64
-    # Convertimos la imagen a base64 para poder centrarla fácilmente en el HTML
     with open(nombre_logo, "rb") as f:
         data = base64.b64encode(f.read()).decode("utf-8")
-        logo_html = f'<img src="data:image/png;base64,{data}" class="logo-img"><br>'
+        # El logo ahora está dentro del contenedor flex para alineación total
+        logo_html = f'<img src="data:image/png;base64,{data}" class="logo-container">'
+else:
+    logo_html = ""
 
-# Renderizado unificado de Logo y Título
 st.markdown(f"""
-    <div class="brand-container">
+    <div class="main-header">
         {logo_html}
         <h1 class="titulo-gigante">CACAO PULSE 360</h1>
         <p class="subtitulo-inteligencia">Inteligencia de Mercado Global | Reporte 2026</p>
