@@ -6,56 +6,65 @@ import os
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(layout="wide", page_title="Cacao Pulse 360", page_icon="🍫")
 
-# Bloque CSS para corregir el error visual
+# Estilos CSS corregidos para integrar Logo + Título Gigante
 st.markdown("""
     <style>
-    /* Eliminar el espacio en blanco superior por defecto de Streamlit */
+    /* Eliminar espacios vacíos superiores */
     .block-container {
-        padding-top: 1rem;
+        padding-top: 1.5rem;
         padding-bottom: 0rem;
     }
     
-    /* Contenedor del Título */
-    .header-container {
-        background-color: transparent;
-        padding: 10px;
+    /* Contenedor principal de marca */
+    .brand-container {
         text-align: center;
+        width: 100%;
+        margin-bottom: 20px;
     }
 
-    .titulo-grande {
+    .logo-img {
+        max-width: 180px;
+        margin-bottom: 10px;
+    }
+
+    .titulo-gigante {
         color: #800000;
-        font-size: clamp(40px, 8vw, 85px); /* Se ajusta solo: mínimo 40px, máximo 85px */
+        font-size: clamp(40px, 8vw, 90px); /* Tamaño grande y responsivo */
         font-weight: 800;
         margin: 0;
         padding: 0;
-        line-height: 1.1;
+        line-height: 1;
         letter-spacing: -2px;
         font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        text-transform: uppercase;
     }
 
     .subtitulo-inteligencia {
         color: #555555;
         font-size: 18px;
-        font-weight: 500;
-        margin-top: 5px;
-        letter-spacing: 2px;
-        text-transform: uppercase;
+        font-weight: 600;
+        margin-top: 10px;
+        letter-spacing: 3px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. ENCABEZADO ESTRUCTURADO
-# Logo pequeño arriba a la izquierda
-col_logo, _ = st.columns([1, 8])
-with col_logo:
-    nombre_logo = "logo_corona_bp.png"
-    if os.path.exists(nombre_logo):
-        st.image(nombre_logo, width=100)
+# 2. SECCIÓN DE ENCABEDAZO (LOGO + TÍTULO)
+# Verificamos si el logo existe para mostrarlo vía HTML centrado
+nombre_logo = "logo_corona_bp.png"
+logo_html = ""
+if os.path.exists(nombre_logo):
+    import base64
+    # Convertimos la imagen a base64 para poder centrarla fácilmente en el HTML
+    with open(nombre_logo, "rb") as f:
+        data = base64.b64encode(f.read()).decode("utf-8")
+        logo_html = f'<img src="data:image/png;base64,{data}" class="logo-img"><br>'
 
-# Título Centrado
-st.markdown("""
-    <div class="header-container">
-        <h1 class="titulo-grande">CACAO PULSE 360</h1>
+# Renderizado unificado de Logo y Título
+st.markdown(f"""
+    <div class="brand-container">
+        {logo_html}
+        <h1 class="titulo-gigante">CACAO PULSE 360</h1>
         <p class="subtitulo-inteligencia">Inteligencia de Mercado Global | Reporte 2026</p>
     </div>
     """, unsafe_allow_html=True)
