@@ -1,48 +1,80 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import yfinance as yf
 
-# Configuración de página
-st.set_page_config(layout="wide", page_title="Cacao Global Dashboard")
+# 1. CONFIGURACIÓN DE LA PÁGINA
+st.set_page_config(layout="wide", page_title="Dashboard Cacao 2026")
 
-st.title("🍫 Cuadro de Mando: Mercado del Cacao 2026")
+# 2. ENCABEZADO: LOGO Y TÍTULO
+# Nota: Si el archivo se llama diferente en tu GitHub, cambia 'logo_empresa.png'
+col_logo, col_titulo = st.columns([1, 4])
 
-# --- DATOS DE PRODUCCIÓN (Basados en tu informe) ---
-# Usamos códigos ISO de 3 letras para que el mapa reconozca los países
+with col_logo:
+    try:
+        st.image("logo_empresa.png", width=150) 
+    except:
+        st.info("Coloca 'logo_empresa.png' en GitHub para ver el logo.")
+
+with col_titulo:
+    st.title("CUADRO DE MANDO - CACAO")
+    st.caption("Última actualización de datos: 13/01/2026")
+
+st.divider()
+
+# 3. FILA 1: MAPA MUNDIAL DE PRODUCCIÓN
+st.subheader("Concentración de la Producción Mundial (TM)")
+# Datos basados en tu informe
 data_mapa = {
-    'País': ['Ivory Coast', 'Ghana', 'Indonesia', 'Nigeria', 'Cameroon', 'Brazil', 'Ecuador', 'Dominican Republic'],
+    'País': ['Costa de Marfil', 'Ghana', 'Indonesia', 'Nigeria', 'Camerún', 'Brasil', 'Ecuador', 'Rep. Dominicana'],
     'ISO': ['CIV', 'GHA', 'IDN', 'NGA', 'CMR', 'BRA', 'ECU', 'DOM'],
     'Producción': [2100000, 800000, 650000, 300000, 280000, 200000, 150000, 80000]
 }
 df_mapa = pd.DataFrame(data_mapa)
 
-# --- MAPA MUNDIAL INTERACTIVO ---
-st.subheader("Concentración de la Producción Mundial (TM)")
 fig_mapa = px.choropleth(df_mapa, 
     locations="ISO", 
     color="Producción",
     hover_name="País",
-    color_continuous_scale=["#ffe5d9", "#d35400", "#7e3412"], # Tonos de naranja fuerte a marrón cacao
+    color_continuous_scale=["#ffe5d9", "#d35400", "#7e3412"],
     projection="natural earth"
 )
-
-fig_mapa.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
+fig_mapa.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
 st.plotly_chart(fig_mapa, use_container_width=True)
 
-# --- RESTO DEL DASHBOARD EN COLUMNAS ---
-col1, col2 = st.columns(2)
+# 4. FILA 2: GRÁFICOS COMPARATIVOS Y PRECIOS
+col_left, col_right = st.columns(2)
 
-with col1:
-    st.subheader("Evolución de Precios (USD/MT)")
-    ticker = "CC=F"
-    cacao_data = yf.download(ticker, period="1y")
-    fig_precios = px.line(cacao_data, y="Close", labels={'Close': 'Precio', 'Date': 'Fecha'})
+with col_left:
+    st.subheader("Producción por País (TM)")
+    # Replicando los datos del gráfico de barras del PDF
+    fig_prod = px.bar(df_mapa.sort_values('Producción', ascending=False), 
+                      x='País', y='Producción', 
+                      color_discrete_sequence=['#d35400'])
+    st.plotly_chart(fig_prod, use_container_width=True)
+
+with col_right:
+    st.subheader("Evolución de Precios Futuros (€/MT)")
+    # Conexión real a mercado (CC=F es Cacao)
+    cacao_yf = yf.download("CC=F", period="1y")
+    fig_precios = px.line(cacao_yf, y="Close")
     fig_precios.update_traces(line_color='#d35400')
     st.plotly_chart(fig_precios, use_container_width=True)
 
-with col2:
-    st.subheader("Riesgos Clave 2026")
-    st.info("**Clima:** Impacto en África Occidental por sequías[cite: 37, 41].")
-    st.warning("**Regulación:** Normativa EUDR activa en Dic 2025[cite: 119].")
-    st.error("**Sanidad:** Riesgo por virus del 'brote hinchado'[cite: 118].")
+# 5. FILA 3: PREVISIONES Y RIESGOS
+st.divider()
+st.subheader("Análisis de Riesgos y Regulaciones")
+c1, c2, c3 = st.columns(3)
+
+with c1:
+    st.markdown("### ☁️ Clima 2026")
+    st.write("Se espera que el cambio climático afecte negativamente la producción en África Occidental. Hasta el 50% de las áreas en Costa de Marfil podrían perderse para 2060.")
+
+with c2:
+    st.markdown("### 📜 Regulación EUDR")
+    st.write("La entrada en vigor de la EUDR en diciembre de 2025 impactará los costos de trazabilidad y precios.")
+
+with c3:
+    st.markdown("### 🧬 Sanidad Vegetal")
+    st.write("La enfermedad del brote hinchado amenaza gravemente la producción en los árboles de cacao.")
