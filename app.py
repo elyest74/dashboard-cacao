@@ -7,14 +7,23 @@ from datetime import datetime
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(layout="wide", page_title="Cacao Pulse 360", page_icon="🍫")
 
-# Inyección de CSS para el título en color Granate
+# Inyección de CSS para centrar y dar estilo al título
 st.markdown("""
     <style>
-    .titulo-granate {
+    .titulo-central {
         color: #800000;
         font-size: 42px;
         font-weight: bold;
-        font-family: 'sans-serif';
+        text-align: center;
+        margin-bottom: 0px;
+        padding-bottom: 0px;
+    }
+    .subtitulo-central {
+        text-align: center;
+        color: #666666;
+        margin-top: 0px;
+        padding-top: 0px;
+        font-size: 16px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -30,20 +39,16 @@ def titulo_con_icono(ruta_icono, texto_titulo):
     else:
         st.subheader(texto_titulo)
 
-# 2. ENCABEZADO Y LOGO
-col_logo, col_titulo = st.columns([1, 4])
-nombre_logo = "logo_corona_bp.png"
-
+# 2. ENCABEZADO (LOGO Y TÍTULO CENTRADO)
+col_logo, col_vacia = st.columns([1, 4])
 with col_logo:
+    nombre_logo = "logo_corona_bp.png"
     if os.path.exists(nombre_logo):
-        st.image(nombre_logo, width=180)
-    else:
-        st.info("💡 Coloca 'logo_corona_bp.png' en la carpeta")
+        st.image(nombre_logo, width=150)
 
-with col_titulo:
-    # Título con clase CSS personalizada
-    st.markdown('<p class="titulo-granate">CACAO PULSE 360</p>', unsafe_allow_html=True)
-    st.caption(f"Referencia: ICE London / NY | Reporte de Inteligencia de Mercado 2026")
+# Título Principal Centrado
+st.markdown('<p class="titulo-central">CACAO PULSE 360</p>', unsafe_allow_html=True)
+st.markdown(f'<p class="subtitulo-central">Referencia: ICE London / NY | Reporte de Inteligencia de Mercado 2026</p>', unsafe_allow_html=True)
 
 st.divider()
 
