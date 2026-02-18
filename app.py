@@ -4,21 +4,16 @@ import plotly.express as px
 import yfinance as yf
 import os
 
-# 1. CONFIGURACIÓN DE LA PÁGINA
 st.set_page_config(layout="wide", page_title="Dashboard Cacao Corona")
 
-# 2. ENCABEZADO CON LOGO Y TÍTULO
+# ENCABEZADO
 col_logo, col_titulo = st.columns([1, 4])
-
-# Nombre exacto de tu archivo
 nombre_logo = "logo_corona_bp.png"
 
 with col_logo:
-    # Verificamos si el archivo existe para evitar el error ValueError
     if os.path.exists(nombre_logo):
         st.image(nombre_logo, width=180)
     else:
-        # Si no lo encuentra, muestra un aviso pero permite que la app cargue
         st.warning(f"⚠️ No se encontró: {nombre_logo}")
 
 with col_titulo:
@@ -27,7 +22,7 @@ with col_titulo:
 
 st.divider()
 
-# 3. FILA 1: MAPA MUNDIAL (Basado en tu PDF)
+# FILA 1: MAPA
 st.subheader("Concentración de la Producción Mundial (TM)")
 data_mapa = {
     'País': ['Costa de Marfil', 'Ghana', 'Indonesia', 'Nigeria', 'Camerún', 'Brasil', 'Ecuador', 'Rep. Dominicana'],
@@ -35,34 +30,45 @@ data_mapa = {
     'Producción': [2100000, 800000, 650000, 300000, 280000, 200000, 150000, 80000]
 }
 df_mapa = pd.DataFrame(data_mapa)
-
-fig_mapa = px.choropleth(df_mapa, 
-    locations="ISO", 
-    color="Producción",
-    hover_name="País",
-    color_continuous_scale=["#FADBD8", "#D35400", "#6E2C00"], # Tonos de naranja a marrón
-    projection="natural earth"
-)
+fig_mapa = px.choropleth(df_mapa, locations="ISO", color="Producción", hover_name="País",
+    color_continuous_scale=["#FADBD8", "#D35400", "#6E2C00"], projection="natural earth")
 fig_mapa.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
 st.plotly_chart(fig_mapa, use_container_width=True)
 
-# 4. FILA 2: GRÁFICOS DE MERCADO EN TIEMPO REAL
+# FILA 2: MERCADO Y COMPARATIVA
 col_left, col_right = st.columns(2)
 
 with col_left:
     st.subheader("Evolución de Precios Futuros (CC=F)")
-    # Conexión directa a Yahoo Finance para actualización automática
     try:
-        cacao_yf = yf.download("CC=F", period="1y")
-        fig_precios = px.line(cacao_yf, y="Close", labels={'Close': 'Precio USD/MT', 'Date': 'Fecha'})
-        fig_precios.update_traces(line_color='#D35400')
-        st.plotly_chart(fig_precios, use_container_width=True)
+        # Usamos un método más robusto para obtener datos
+        cacao_data = yf.download("CC=F", period="1y", interval="1d", progress=False)
+        if not cacao_data.empty:
+            fig_precios = px.line(cacao_data, y="Close")
+            fig_precios.update_traces(line_color='#D35400')
+            st.plotly_chart(fig_precios, use_container_width=True)
+        else:
+            st.info("Buscando datos de mercado...")
     except:
-        st.error("Error al conectar con los datos de mercado.")
+        st.error("Error de conexión con Yahoo Finance.")
 
 with col_right:
     st.subheader("Comparativa de Producción por Origen")
+    fig_barras = px.bar(df_mapa.sort_values('Producción', ascending=True), 
+                        x='Producción', y='País', orientation='h',
+                        color_discrete_sequence=['#D35400'])
+    st.plotly_chart(fig_barras, use_container_width=True)
 
+# FILA 3: RIESGOS
+st.divider()
+st.subheader("Factores Críticos de Decisión 2026")
+c1, c2, c3 = st.columns(3)
+with c1:
+    st.error("🚨 **RIESGO CLIMÁTICO**")
+    st.write("Déficit hídrico en África Occidental. Costa de Marfil bajo vigilancia.")
+with c2:
+    st.warning("⚖️ **REGULACIÓN EUDR**")
+    st.write("Diciembre 2025: Normativa de deforestación activa.")
 with c3:
-    st.markdown("### 🧬 Sanidad Vegetal")
-    st.write("La enfermedad del brote hinchado amenaza gravemente la producción en los árboles de cacao.")
+    st.info("📊 **STOCKS**")
+    st.write("Caída en inventarios certificados presionando precios.")
