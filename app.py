@@ -67,4 +67,67 @@ with col_map:
 with col_bar:
     titulo_con_icono("Exportaciones.PNG", "Exportaciones (TM)")
     df_exp_sorted = df_paises.sort_values('Exportación')
-    fig_exp = px.
+    fig_exp = px.bar(df_exp_sorted, x='Exportación', y='País', orientation='h', color_discrete_sequence=['#7e3412'])
+    fig_exp.update_layout(height=350)
+    st.plotly_chart(fig_exp, use_container_width=True)
+
+# 5. CONEXIÓN REFORZADA A MERCADOS
+st.divider()
+col_fx, col_cocoa = st.columns(2)
+
+def obtener_fx_bce():
+    try:
+        url = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip"
+        df = pd.read_csv(url, compression='zip')
+        df_usd = df[['Date', 'USD']].copy()
+        df_usd['Date'] = pd.to_datetime(df_usd['Date'])
+        return df_usd.sort_values('Date').tail(180)
+    except:
+        return pd.DataFrame()
+
+def descargar_datos_cacao():
+    try:
+        # Usamos Ticker para mayor estabilidad en la conexión
+        cacao = yf.Ticker("CC=F")
+        df = cacao.history(period="1y")
+        if not df.empty:
+            df = df.reset_index()
+            # Limpieza de MultiIndex si existiera
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            return df
+        return pd.DataFrame()
+    except:
+        return pd.DataFrame()
+
+with col_fx:
+    titulo_con_icono("Cambio USD EUR.PNG", "Tasa de Cambio EUR/USD (BCE)")
+    df_fx = obtener_fx_bce()
+    if not df_fx.empty:
+        fig_fx = px.line(df_fx, x='Date', y='USD')
+        fig_fx.update_traces(line_color='#2E86C1')
+        st.plotly_chart(fig_fx, use_container_width=True)
+    else:
+        st.error("Error al conectar con el BCE.")
+
+with col_cocoa:
+    titulo_con_icono("Futuros Cacao.PNG", "Precio Cacao (ICE US Cocoa)")
+    df_cc = descargar_datos_cacao()
+    if not df_cc.empty:
+        fig_cc = px.area(df_cc, x='Date', y='Close')
+        fig_cc.update_traces(line_color='#d35400', fillcolor='rgba(211, 84, 0, 0.2)')
+        st.plotly_chart(fig_cc, use_container_width=True)
+    else:
+        st.warning("⚠️ Datos en tiempo real no disponibles (Mercado Cerrado o Error de Red).")
+
+# 6. IMPORTADORES
+st.divider()
+titulo_con_icono("Principales Importadores.PNG", "Principales Importadores Globales (TM)")
+
+df_imp = pd.DataFrame({
+    'País': ['Países Bajos', 'EE.UU.', 'Alemania', 'Bélgica', 'Malasia', 'España'],
+    'TM': [750000, 680000, 520000, 310000, 290000, 85000]
+}).sort_values('TM', ascending=True)
+
+fig_imp = px.bar(df_imp, x='TM', y='País', orientation='h', color='TM', color_continuous_scale='Oranges', text_auto='.2s')
+st.plotly_chart(fig_imp, use_container_width=True)
