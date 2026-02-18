@@ -42,54 +42,22 @@ with k4: st.metric("Importación UE", "1.10M TM", "+0.5%")
 
 st.divider()
 
-# 4. MERCADOS: HISTÓRICO Y MERCADO DE FUTUROS (LÍNEAS)
+# 4. MERCADOS: HISTÓRICO Y MERCADO DE FUTUROS
 col_hist, col_fut = st.columns(2)
 
 with col_hist:
-    # Cambio de nombre solicitado
     titulo_con_icono("Futuros Cacao.PNG", "Histórico de Precios (USD/MT)")
     hist_data = {
-        'Fecha': pd.date_range(start='2025-01-01', periods=12, freq='M'),
+        'Fecha': pd.date_range(start='2025-01-01', periods=12, freq='ME'),
         'Precio USD/MT': [8200, 8500, 9100, 9800, 9400, 9200, 9600, 9900, 10200, 9800, 9500, 9350]
     }
     df_hist = pd.DataFrame(hist_data)
     fig_hist = px.line(df_hist, x='Fecha', y='Precio USD/MT', markers=True)
     fig_hist.update_traces(line_color='#d35400')
-    fig_hist.update_layout(xaxis_title="Meses anteriores", yaxis_title="Precio (USD/MT)")
+    fig_hist.update_layout(xaxis_title="Evolución Mensual", yaxis_title="Precio (USD/MT)")
     st.plotly_chart(fig_hist, use_container_width=True)
 
 with col_fut:
-    # Cambio de nombre solicitado
     titulo_con_icono("Futuros Cacao.PNG", "Mercado de Futuros (USD/MT)")
-    
-    # Datos de los contratos futuros mensuales
     vencimientos = {
-        'Mes Vencimiento': ['Mar 26', 'May 26', 'Jul 26', 'Sep 26', 'Dic 26', 'Mar 27'],
-        'Precio Proyectado': [9450, 9300, 9150, 8900, 8750, 8500]
-    }
-    df_venc = pd.DataFrame(vencimientos)
-    
-    # Gráfico de líneas solicitado
-    fig_venc = px.line(df_venc, x='Mes Vencimiento', y='Precio Proyectado', 
-                       markers=True, text='Precio Proyectado')
-    
-    fig_venc.update_traces(
-        line=dict(color='#7e3412', width=4),
-        marker=dict(size=10, color='#d35400'),
-        textposition="top center"
-    )
-    
-    fig_venc.update_layout(
-        xaxis_title="Vencimientos Futuros",
-        yaxis_title="Precio (USD/MT)",
-        hovermode="x unified"
-    )
-    st.plotly_chart(fig_venc, use_container_width=True)
-
-st.divider()
-
-# 5. MAPA Y EXPORTACIONES
-col_map, col_bar = st.columns([2, 1])
-
-df_paises = pd.DataFrame({
-    'ISO': ['CIV', 'GHA', 'IDN', 'N
+        'Mes Vencimiento': ['Mar 26', 'May 26', 'Jul 26', 'Sep
