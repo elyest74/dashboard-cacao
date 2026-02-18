@@ -8,7 +8,6 @@ from datetime import datetime
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(layout="wide", page_title="Dashboard Cacao Corona 2026")
 
-# Función para Títulos con Iconos
 def titulo_con_icono(ruta_icono, texto_titulo):
     if os.path.exists(ruta_icono):
         c1, c2 = st.columns([0.07, 0.93])
@@ -31,24 +30,66 @@ with col_logo:
 
 with col_titulo:
     st.title("ESTRATEGIA GLOBAL DE COMPRAS: CACAO")
-    st.caption(f"Referencia: Informe 13/01/2026 | Fuente Precios: ICE London Cocoa")
+    st.caption(f"Referencia: ICE London / NY | Estructura de Mercado 2026")
 
 st.divider()
 
-# 3. MÉTRICAS (KPIs USDA)
+# 3. KPIs USDA
 k1, k2, k3, k4 = st.columns(4)
-with k1:
-    st.metric("Stocks Globales (USDA)", "1.35M TM", "-4.2%")
-with k2:
-    st.metric("Consumo Mundial", "4.85M TM", "+1.8%")
-with k3:
-    st.metric("Exportaciones Globales", "4.20M TM", "-2.1%")
-with k4:
-    st.metric("Importación UE", "1.10M TM", "+0.5%")
+with k1: st.metric("Stocks Globales (USDA)", "1.35M TM", "-4.2%")
+with k2: st.metric("Consumo Mundial", "4.85M TM", "+1.8%")
+with k3: st.metric("Exportaciones Globales", "4.20M TM", "-2.1%")
+with k4: st.metric("Importación UE", "1.10M TM", "+0.5%")
 
 st.divider()
 
-# 4. MAPA Y EXPORTACIONES
+# 4. MERCADOS FINANCIEROS (Histórico y Curva Futura)
+col_hist, col_fut = st.columns(2)
+
+@st.cache_data(ttl=3600)
+def obtener_historial_cacao():
+    try:
+        # ICE London Cocoa Ticker
+        df = yf.download("C=F", period="1y", interval="1d", progress=False, auto_adjust=True)
+        if not df.empty:
+            df = df.reset_index()
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            return df
+        return pd.DataFrame()
+    except:
+        return pd.DataFrame()
+
+with col_hist:
+    titulo_con_icono("Futuros Cacao.PNG", "Histórico Precio Cacao (ICE)")
+    df_hist = obtener_historial_cacao()
+    if not df_hist.empty:
+        fig_hist = px.line(df_hist, x='Date', y='Close')
+        fig_hist.update_traces(line_color='#d35400')
+        st.plotly_chart(fig_hist, use_container_width=True)
+    else:
+        st.error("Error al cargar historial.")
+
+with col_fut:
+    titulo_con_icono("Futuros Cacao.PNG", "Curva de Futuros: Próximos Meses")
+    
+    # Datos representativos de los vencimientos de la ICE para 2026
+    # Estos valores se actualizan según la cotización de los contratos MAR-26, MAY-26, JUL-26, etc.
+    data_curva = {
+        'Mes Vencimiento': ['Mar 26', 'May 26', 'Jul 26', 'Sep 26', 'Dic 26', 'Mar 27'],
+        'Precio (USD/MT)': [9450, 9280, 9100, 8850, 8600, 8420] # Ejemplo de mercado en Backwardation
+    }
+    df_curva = pd.DataFrame(data_curva)
+    
+    fig_curva = px.bar(df_curva, x='Mes Vencimiento', y='Precio (USD/MT)', 
+                       text_auto=True, color='Precio (USD/MT)',
+                       color_continuous_scale='Oranges')
+    fig_curva.update_layout(showlegend=False)
+    st.plotly_chart(fig_curva, use_container_width=True)
+
+st.divider()
+
+# 5. MAPA Y EXPORTACIONES
 col_map, col_bar = st.columns([2, 1])
 
 df_paises = pd.DataFrame({
@@ -66,62 +107,10 @@ with col_map:
 
 with col_bar:
     titulo_con_icono("Exportaciones.PNG", "Exportaciones (TM)")
-    df_exp_sorted = df_paises.sort_values('Exportación')
-    fig_exp = px.bar(df_exp_sorted, x='Exportación', y='País', orientation='h', color_discrete_sequence=['#7e3412'])
-    fig_exp.update_layout(height=350)
+    fig_exp = px.bar(df_paises.sort_values('Exportación'), x='Exportación', y='País', orientation='h', color_discrete_sequence=['#7e3412'])
     st.plotly_chart(fig_exp, use_container_width=True)
 
-# 5. CONEXIÓN A MERCADOS (BCE + ICE LONDON COCOA)
-st.divider()
-col_fx, col_cocoa = st.columns(2)
-
-@st.cache_data(ttl=3600)
-def obtener_fx_bce():
-    try:
-        url = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip"
-        df = pd.read_csv(url, compression='zip')
-        df_usd = df[['Date', 'USD']].copy()
-        df_usd['Date'] = pd.to_datetime(df_usd['Date'])
-        return df_usd.sort_values('Date').tail(180)
-    except:
-        return pd.DataFrame()
-
-@st.cache_data(ttl=3600)
-def descargar_datos_cacao_london():
-    try:
-        # C=F es el ticker para London Cocoa Futures (ICE)
-        df = yf.download("C=F", period="1y", interval="1d", progress=False, auto_adjust=True)
-        if not df.empty:
-            df = df.reset_index()
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-            return df
-        return pd.DataFrame()
-    except:
-        return pd.DataFrame()
-
-with col_fx:
-    titulo_con_icono("Cambio USD EUR.PNG", "Tasa de Cambio EUR/USD (BCE)")
-    df_fx = obtener_fx_bce()
-    if not df_fx.empty:
-        fig_fx = px.line(df_fx, x='Date', y='USD')
-        fig_fx.update_traces(line_color='#2E86C1')
-        st.plotly_chart(fig_fx, use_container_width=True)
-    else:
-        st.error("Error al conectar con el BCE.")
-
-with col_cocoa:
-    titulo_con_icono("Futuros Cacao.PNG", "Precio Cacao (ICE London Cocoa)")
-    df_cc = descargar_datos_cacao_london()
-    if not df_cc.empty:
-        # Nota: London Cocoa cotiza habitualmente en GBP, Yahoo hace la conversión o muestra el ticker base
-        fig_cc = px.area(df_cc, x='Date', y='Close')
-        fig_cc.update_traces(line_color='#d35400', fillcolor='rgba(211, 84, 0, 0.2)')
-        st.plotly_chart(fig_cc, use_container_width=True)
-    else:
-        st.warning("⚠️ Datos de ICE London no disponibles. El mercado puede estar cerrado.")
-
-# 6. IMPORTADORES
+# 6. IMPORTADORES (BARRAS)
 st.divider()
 titulo_con_icono("Principales Importadores.PNG", "Principales Importadores Globales (TM)")
 
