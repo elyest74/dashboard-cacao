@@ -1,32 +1,34 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import yfinance as yf
+import os
 
 # 1. CONFIGURACIÓN DE LA PÁGINA
-st.set_page_config(layout="wide", page_title="Dashboard Cacao 2026")
+st.set_page_config(layout="wide", page_title="Dashboard Cacao Corona")
 
-# 2. ENCABEZADO: LOGO Y TÍTULO
-# Hemos ajustado el nombre al archivo exacto que tienes en GitHub
+# 2. ENCABEZADO CON LOGO Y TÍTULO
 col_logo, col_titulo = st.columns([1, 4])
 
+# Nombre exacto de tu archivo
+nombre_logo = "logo_corona_bp.png"
+
 with col_logo:
-    try:
-        # Aquí es donde ponemos el nombre exacto de tu archivo
-        st.image("logo_corona_bp.png", width=150) 
-    except:
-        st.error("No se pudo cargar 'logo_corona_bp.png'. Revisa que esté en la raíz de tu GitHub.")
+    # Verificamos si el archivo existe para evitar el error ValueError
+    if os.path.exists(nombre_logo):
+        st.image(nombre_logo, width=180)
+    else:
+        # Si no lo encuentra, muestra un aviso pero permite que la app cargue
+        st.warning(f"⚠️ No se encontró: {nombre_logo}")
 
 with col_titulo:
-    st.title("CUADRO DE MANDO - CACAO")
-    st.caption("Actualizado: 13/01/2026")
+    st.title("CUADRO DE MANDO - ESTRATEGIA CACAO")
+    st.caption("Referencia de datos: Informe 13/01/2026")
 
 st.divider()
 
-# 3. FILA 1: MAPA MUNDIAL DE PRODUCCIÓN
+# 3. FILA 1: MAPA MUNDIAL (Basado en tu PDF)
 st.subheader("Concentración de la Producción Mundial (TM)")
-# Datos basados en tu informe
 data_mapa = {
     'País': ['Costa de Marfil', 'Ghana', 'Indonesia', 'Nigeria', 'Camerún', 'Brasil', 'Ecuador', 'Rep. Dominicana'],
     'ISO': ['CIV', 'GHA', 'IDN', 'NGA', 'CMR', 'BRA', 'ECU', 'DOM'],
@@ -38,43 +40,28 @@ fig_mapa = px.choropleth(df_mapa,
     locations="ISO", 
     color="Producción",
     hover_name="País",
-    color_continuous_scale=["#ffe5d9", "#d35400", "#7e3412"],
+    color_continuous_scale=["#FADBD8", "#D35400", "#6E2C00"], # Tonos de naranja a marrón
     projection="natural earth"
 )
 fig_mapa.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
 st.plotly_chart(fig_mapa, use_container_width=True)
 
-# 4. FILA 2: GRÁFICOS COMPARATIVOS Y PRECIOS
+# 4. FILA 2: GRÁFICOS DE MERCADO EN TIEMPO REAL
 col_left, col_right = st.columns(2)
 
 with col_left:
-    st.subheader("Producción por País (TM)")
-    # Replicando los datos del gráfico de barras del PDF
-    fig_prod = px.bar(df_mapa.sort_values('Producción', ascending=False), 
-                      x='País', y='Producción', 
-                      color_discrete_sequence=['#d35400'])
-    st.plotly_chart(fig_prod, use_container_width=True)
+    st.subheader("Evolución de Precios Futuros (CC=F)")
+    # Conexión directa a Yahoo Finance para actualización automática
+    try:
+        cacao_yf = yf.download("CC=F", period="1y")
+        fig_precios = px.line(cacao_yf, y="Close", labels={'Close': 'Precio USD/MT', 'Date': 'Fecha'})
+        fig_precios.update_traces(line_color='#D35400')
+        st.plotly_chart(fig_precios, use_container_width=True)
+    except:
+        st.error("Error al conectar con los datos de mercado.")
 
 with col_right:
-    st.subheader("Evolución de Precios Futuros (€/MT)")
-    # Conexión real a mercado (CC=F es Cacao)
-    cacao_yf = yf.download("CC=F", period="1y")
-    fig_precios = px.line(cacao_yf, y="Close")
-    fig_precios.update_traces(line_color='#d35400')
-    st.plotly_chart(fig_precios, use_container_width=True)
-
-# 5. FILA 3: PREVISIONES Y RIESGOS
-st.divider()
-st.subheader("Análisis de Riesgos y Regulaciones")
-c1, c2, c3 = st.columns(3)
-
-with c1:
-    st.markdown("### ☁️ Clima 2026")
-    st.write("Se espera que el cambio climático afecte negativamente la producción en África Occidental. Hasta el 50% de las áreas en Costa de Marfil podrían perderse para 2060.")
-
-with c2:
-    st.markdown("### 📜 Regulación EUDR")
-    st.write("La entrada en vigor de la EUDR en diciembre de 2025 impactará los costos de trazabilidad y precios.")
+    st.subheader("Comparativa de Producción por Origen")
 
 with c3:
     st.markdown("### 🧬 Sanidad Vegetal")
