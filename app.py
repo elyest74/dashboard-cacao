@@ -8,18 +8,19 @@ import yfinance as yf
 st.set_page_config(layout="wide", page_title="Dashboard Cacao 2026")
 
 # 2. ENCABEZADO: LOGO Y TÍTULO
-# Nota: Si el archivo se llama diferente en tu GitHub, cambia 'logo_corona_bp.png'
+# Hemos ajustado el nombre al archivo exacto que tienes en GitHub
 col_logo, col_titulo = st.columns([1, 4])
 
 with col_logo:
     try:
-        st.image("logo_empresa.png", width=150) 
+        # Aquí es donde ponemos el nombre exacto de tu archivo
+        st.image("logo_corona_bp.png", width=150) 
     except:
-        st.info("Coloca 'logo_empresa.png' en GitHub para ver el logo.")
+        st.error("No se pudo cargar 'logo_corona_bp.png'. Revisa que esté en la raíz de tu GitHub.")
 
 with col_titulo:
     st.title("CUADRO DE MANDO - CACAO")
-    st.caption("Última actualización de datos: 13/01/2026")
+    st.caption("Actualizado: 13/01/2026")
 
 st.divider()
 
