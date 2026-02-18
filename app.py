@@ -5,7 +5,19 @@ import os
 from datetime import datetime
 
 # 1. CONFIGURACIÓN DE PÁGINA
-st.set_page_config(layout="wide", page_title="Dashboard Cacao Corona 2026", page_icon="🍫")
+st.set_page_config(layout="wide", page_title="Cacao Pulse 360", page_icon="🍫")
+
+# Inyección de CSS para el título en color Granate
+st.markdown("""
+    <style>
+    .titulo-granate {
+        color: #800000;
+        font-size: 42px;
+        font-weight: bold;
+        font-family: 'sans-serif';
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Función para Títulos con Iconos
 def titulo_con_icono(ruta_icono, texto_titulo):
@@ -29,7 +41,8 @@ with col_logo:
         st.info("💡 Coloca 'logo_corona_bp.png' en la carpeta")
 
 with col_titulo:
-    st.title("ESTRATEGIA GLOBAL DE COMPRAS: CACAO")
+    # Título con clase CSS personalizada
+    st.markdown('<p class="titulo-granate">CACAO PULSE 360</p>', unsafe_allow_html=True)
     st.caption(f"Referencia: ICE London / NY | Reporte de Inteligencia de Mercado 2026")
 
 st.divider()
@@ -88,9 +101,7 @@ df_productores = pd.DataFrame({
 })
 
 with col_prod:
-    # Título actualizado según tu solicitud
     st.subheader("📍 Países donde se concentra la producción")
-    
     fig_map = px.choropleth(df_productores, 
                            locations="ISO", 
                            color="Producción", 
