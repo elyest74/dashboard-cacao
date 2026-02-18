@@ -31,46 +31,44 @@ st.markdown(f"""<div class="main-header">{logo_html}<h1 class="titulo-gigante">C
 
 st.divider()
 
-# 3. KPIs GLOBALES (DATA ACTUALIZADA)
+# 3. KPIs GLOBALES
 k1, k2, k3, k4, k5 = st.columns(5)
-with k1: st.metric("Cacao Futuros (NY)", "3,203.00 USD", "+0.45%")
+with k1: st.metric("Cacao Futuros (NY)", "3,203.00 USD", "-1.2%")
 with k2: st.metric("Tasa EUR/USD", "1.0850", "-0.15%")
-with k3: st.metric("Stocks Globales", "1.15M TM", "-1.2%")
-with k4: st.metric("Exportaciones", "3.95M TM", "-1.1%")
+with k3: st.metric("Mín. 52 Semanas", "2,950.00", "")
+with k4: st.metric("Máx. 52 Semanas", "11,722.00", "")
 with k5: st.metric("Importación UE", "0.95M TM", "+0.2%")
 
 st.divider()
 
-# 4. ANÁLISIS DE DIVISAS Y PRECIOS (GRÁFICAS DE LÍNEAS CON DATA CORREGIDA)
+# 4. ANÁLISIS DE DIVISAS Y PRECIOS (12 MESES)
 col_eur, col_hist, col_fut = st.columns(3)
 
 with col_eur:
-    st.subheader("💱 Evolución EUR/USD")
-    eur_data = {'Fecha': pd.date_range(end='2026-02-18', periods=6, freq='ME'),
-                'EUR/USD': [1.10, 1.09, 1.08, 1.082, 1.088, 1.085]}
-    df_eur = pd.DataFrame(eur_data)
-    fig_eur = px.line(df_eur, x='Fecha', y='EUR/USD', markers=True)
-    fig_eur.update_traces(line_color='#2ecc71', line_width=3)
+    st.subheader("💱 Evolución EUR/USD (12M)")
+    eur_data = {'Fecha': pd.date_range(end='2026-02-18', periods=12, freq='ME'),
+                'EUR/USD': [1.08, 1.09, 1.07, 1.08, 1.10, 1.11, 1.12, 1.10, 1.09, 1.08, 1.085, 1.085]}
+    fig_eur = px.line(pd.DataFrame(eur_data), x='Fecha', y='EUR/USD', markers=True)
+    fig_eur.update_traces(line_color='#2ecc71')
     st.plotly_chart(fig_eur, use_container_width=True)
 
 with col_hist:
-    st.subheader("📉 Histórico Cacao (USD/MT)")
-    # Datos actualizados para reflejar la realidad del mercado cerca de los 3200
-    hist_data = {'Fecha': pd.date_range(end='2026-02-18', periods=6, freq='ME'),
-                 'Precio': [2850, 2980, 3100, 3050, 3150, 3203]}
-    df_hist = pd.DataFrame(hist_data)
-    fig_hist = px.line(df_hist, x='Fecha', y='Precio', markers=True)
-    fig_hist.update_traces(line_color='#d35400', line_width=3)
+    st.subheader("📉 Histórico Cacao USD/MT (12M)")
+    # Reflejando la caída desde los máximos de 2024/2025 hacia los 3203 actuales
+    hist_data = {'Fecha': pd.date_range(end='2026-02-18', periods=12, freq='ME'),
+                 'Precio': [10500, 11700, 9800, 8500, 7200, 6400, 5800, 4900, 4100, 3500, 3100, 3203]}
+    fig_hist = px.line(pd.DataFrame(hist_data), x='Fecha', y='Precio', markers=True)
+    fig_hist.update_traces(line_color='#d35400')
     st.plotly_chart(fig_hist, use_container_width=True)
 
 with col_fut:
-    st.subheader("📅 Futuros Cacao (USD/MT)")
-    # Curva de futuros realista (NY ICE)
-    venc_data = {'Mes': ['May 26', 'Jul 26', 'Sep 26', 'Dic 26', 'Mar 27', 'May 27'],
-                 'Precio': [3203, 3180, 3155, 3120, 3080, 3050]}
-    df_venc = pd.DataFrame(venc_data)
-    fig_venc = px.line(df_venc, x='Mes', y='Precio', markers=True, text='Precio')
-    fig_venc.update_traces(line=dict(color='#7e3412', width=4), textposition="top center")
+    st.subheader("📅 Mercado de Futuros USD/MT (12M)")
+    # Proyección a 12 meses vista desde Mar 26
+    venc_data = {'Mes': ['Mar 26', 'May 26', 'Jul 26', 'Sep 26', 'Dic 26', 'Mar 27', 
+                        'May 27', 'Jul 27', 'Sep 27', 'Dic 27', 'Mar 28', 'May 28'],
+                 'Precio': [3203, 3190, 3175, 3160, 3140, 3110, 3090, 3075, 3050, 3020, 2990, 2970]}
+    fig_venc = px.line(pd.DataFrame(venc_data), x='Mes', y='Precio', markers=True, text='Precio')
+    fig_venc.update_traces(line=dict(color='#7e3412', width=3), textposition="top center")
     st.plotly_chart(fig_venc, use_container_width=True)
 
 st.divider()
@@ -86,7 +84,7 @@ df_prod = pd.DataFrame({
 })
 
 with col_prod:
-    st.subheader("📍 Países donde se concentra la producción")
+    st.subheader("📍 Concentración de la Producción Mundial")
     fig_map = px.choropleth(df_prod, locations="ISO", color="Producción", color_continuous_scale="Oranges", projection="orthographic")
     fig_map.update_geos(projection_rotation=dict(lon=0, lat=10, roll=0), showocean=True, oceancolor="#e8f4f8")
     fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=450)
@@ -94,8 +92,7 @@ with col_prod:
 
 with col_stock_p:
     st.subheader("📦 Stocks en Origen (MT)")
-    fig_stock = px.bar(df_prod.sort_values('Stocks'), x='Stocks', y='País', orientation='h', color='Stocks', color_continuous_scale='Reds')
-    st.plotly_chart(fig_stock, use_container_width=True)
+    st.plotly_chart(px.bar(df_prod.sort_values('Stocks'), x='Stocks', y='País', orientation='h', color='Stocks', color_continuous_scale='Reds'), use_container_width=True)
 
 st.divider()
 
