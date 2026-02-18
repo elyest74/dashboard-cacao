@@ -7,12 +7,12 @@ import base64
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(layout="wide", page_title="Cacao Pulse 360", page_icon="🍫")
 
-# Estilos CSS para alineación vertical, central absoluta y mejora de fuentes
+# Estilos CSS (Alineación, Títulos, y Pie de página)
 st.markdown("""
     <style>
     .block-container {
         padding-top: 1.5rem;
-        padding-bottom: 2rem;
+        padding-bottom: 3rem;
     }
     .main-header {
         display: flex;
@@ -43,6 +43,16 @@ st.markdown("""
         letter-spacing: 4px;
         text-transform: uppercase;
         margin-top: 5px;
+    }
+    .footer-autor {
+        text-align: center;
+        color: #800000;
+        font-weight: bold;
+        font-size: 20px;
+        margin-top: 50px;
+        padding: 20px;
+        border-top: 1px solid #eeeeee;
+        font-family: 'Segoe UI', sans-serif;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -123,7 +133,7 @@ with col_stock_p:
 
 st.divider()
 
-# 6. EXPORTACIONES, CONSUMO E IMPORTADORES (RECUPERADOS)
+# 6. EXPORTACIONES, CONSUMO E IMPORTADORES
 col_exp, col_cons, col_imp = st.columns(3)
 
 with col_exp:
@@ -144,3 +154,6 @@ with col_imp:
                            'MT': [750000, 680000, 520000, 290000, 85000]})
     fig_imp = px.bar(df_imp.sort_values('MT'), x='MT', y='País', orientation='h', color_discrete_sequence=['#800000'])
     st.plotly_chart(fig_imp, use_container_width=True)
+
+# 7. PIE DE PÁGINA: AUTORÍA
+st.markdown('<p class="footer-autor">Elaborado por: ELYMAR ESTÉVEZ</p>', unsafe_allow_html=True)
