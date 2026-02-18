@@ -7,23 +7,27 @@ from datetime import datetime
 # 1. CONFIGURACIÓN DE PÁGINA
 st.set_page_config(layout="wide", page_title="Cacao Pulse 360", page_icon="🍫")
 
-# Inyección de CSS para centrar y dar estilo al título
+# Inyección de CSS para maximizar el título
 st.markdown("""
     <style>
     .titulo-central {
         color: #800000;
-        font-size: 42px;
-        font-weight: bold;
+        font-size: 60px; /* Tamaño aumentado para impacto máximo */
+        font-weight: 900; /* Extra negrita */
         text-align: center;
-        margin-bottom: 0px;
+        margin-top: -20px;
+        margin-bottom: 5px;
         padding-bottom: 0px;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
     .subtitulo-central {
         text-align: center;
-        color: #666666;
+        color: #555555;
         margin-top: 0px;
+        margin-bottom: 20px;
         padding-top: 0px;
-        font-size: 16px;
+        font-size: 18px;
+        font-style: italic;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -39,14 +43,15 @@ def titulo_con_icono(ruta_icono, texto_titulo):
     else:
         st.subheader(texto_titulo)
 
-# 2. ENCABEZADO (LOGO Y TÍTULO CENTRADO)
-col_logo, col_vacia = st.columns([1, 4])
+# 2. ENCABEZADO (LOGO Y TÍTULO GIGANTE)
+# Colocamos el logo en una esquina y el título centrado
+col_logo, _ = st.columns([1, 5])
 with col_logo:
     nombre_logo = "logo_corona_bp.png"
     if os.path.exists(nombre_logo):
         st.image(nombre_logo, width=150)
 
-# Título Principal Centrado
+# Título Principal Centrado y Grande
 st.markdown('<p class="titulo-central">CACAO PULSE 360</p>', unsafe_allow_html=True)
 st.markdown(f'<p class="subtitulo-central">Referencia: ICE London / NY | Reporte de Inteligencia de Mercado 2026</p>', unsafe_allow_html=True)
 
@@ -118,7 +123,7 @@ with col_prod:
         showocean=True, oceancolor="#e8f4f8",
         showcountries=True, countrycolor="#cccccc"
     )
-    fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
+    fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=550)
     st.plotly_chart(fig_map, use_container_width=True)
 
 with col_stock_p:
@@ -127,7 +132,7 @@ with col_stock_p:
                          x='Stocks_MT', y='País', orientation='h', 
                          color='Stocks_MT', color_continuous_scale='Reds',
                          text_auto='.2s')
-    fig_stock_p.update_layout(showlegend=False, height=500)
+    fig_stock_p.update_layout(showlegend=False, height=550)
     st.plotly_chart(fig_stock_p, use_container_width=True)
 
 st.divider()
