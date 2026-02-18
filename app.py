@@ -36,7 +36,7 @@ with k4:
 
 st.divider()
 
-# 4. MAPA Y DATOS DE PAÍSES
+# 4. MAPA Y EXPORTACIONES
 col_map, col_bar = st.columns([2, 1])
 
 df_paises = pd.DataFrame({
@@ -59,13 +59,12 @@ with col_bar:
                      orientation='h', color_discrete_sequence=['#7e3412'])
     st.plotly_chart(fig_exp, use_container_width=True)
 
-# 5. CONEXIÓN A MERCADOS (ESTE ES EL BLOQUE QUE ESTABA FALLANDO)
+# 5. CONEXIÓN A MERCADOS (FINANZAS Y DIVISAS)
 st.divider()
 col_fx, col_cocoa = st.columns(2)
 
 def obtener_datos(ticker):
     try:
-        # Intentamos descargar con parámetros de seguridad
         data = yf.download(ticker, period="1y", interval="1d", progress=False, auto_adjust=True)
         return data
     except:
@@ -79,7 +78,7 @@ with col_fx:
         fig_fx.update_traces(line_color='#2E86C1')
         st.plotly_chart(fig_fx, use_container_width=True)
     else:
-        st.error("Servidor de divisas ocupado. Reintente en un momento.")
+        st.error("Error de conexión con divisas.")
 
 with col_cocoa:
     st.subheader("📈 Precio Futuros Cacao (CC=F)")
@@ -89,14 +88,26 @@ with col_cocoa:
         fig_cc.update_traces(line_color='#d35400', fillcolor='rgba(211, 84, 0, 0.2)')
         st.plotly_chart(fig_cc, use_container_width=True)
     else:
-        # PLAN B: Si falla el mercado real, mostramos aviso informativo
-        st.warning("⚠️ El mercado financiero está cerrado o la conexión falló. Intente refrescar la página.")
+        st.warning("⚠️ Conexión de mercado no disponible.")
 
-# 6. TABLA DE IMPORTADORES (USDA)
+# 6. IMPORTADORES (AHORA EN GRÁFICO DE BARRAS)
 st.divider()
-st.subheader("📥 Principales Importadores Globales")
+st.subheader("📥 Principales Importadores Globales (TM)")
 df_imp = pd.DataFrame({
     'País Importador': ['Países Bajos', 'EE.UU.', 'Alemania', 'Bélgica', 'Malasia', 'España'],
     'TM Importadas': [750000, 680000, 520000, 310000, 290000, 85000]
 })
-st.table(df_imp)
+
+# Ordenamos para que la barra más larga salga arriba
+df_imp = df_imp.sort_values('TM Importadas', ascending=True)
+
+fig_imp = px.bar(df_imp, 
+                 x='TM Importadas', 
+                 y='País Importador', 
+                 orientation='h',
+                 color='TM Importadas',
+                 color_continuous_scale='Oranges',
+                 text_auto='.2s')
+
+fig_imp.update_layout(showlegend=False, height=400)
+st.plotly_chart(fig_imp, use_container_width=True)
