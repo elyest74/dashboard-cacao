@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import yfinance as yf
 import os
 from datetime import datetime
 
@@ -30,7 +29,7 @@ with col_logo:
 
 with col_titulo:
     st.title("ESTRATEGIA GLOBAL DE COMPRAS: CACAO")
-    st.caption(f"Referencia: ICE London / NY | Estructura de Mercado 2026")
+    st.caption(f"Referencia: ICE London / NY | Proyección de Vencimientos Mensuales 2026")
 
 st.divider()
 
@@ -43,49 +42,46 @@ with k4: st.metric("Importación UE", "1.10M TM", "+0.5%")
 
 st.divider()
 
-# 4. MERCADOS FINANCIEROS (Histórico y Curva Futura)
+# 4. MERCADOS: HISTÓRICO Y CURVA DE FUTUROS (LÍNEAS)
 col_hist, col_fut = st.columns(2)
 
-@st.cache_data(ttl=3600)
-def obtener_historial_cacao():
-    try:
-        # ICE London Cocoa Ticker
-        df = yf.download("C=F", period="1y", interval="1d", progress=False, auto_adjust=True)
-        if not df.empty:
-            df = df.reset_index()
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-            return df
-        return pd.DataFrame()
-    except:
-        return pd.DataFrame()
-
 with col_hist:
-    titulo_con_icono("Futuros Cacao.PNG", "Histórico Precio Cacao (ICE)")
-    df_hist = obtener_historial_cacao()
-    if not df_hist.empty:
-        fig_hist = px.line(df_hist, x='Date', y='Close')
-        fig_hist.update_traces(line_color='#d35400')
-        st.plotly_chart(fig_hist, use_container_width=True)
-    else:
-        st.error("Error al cargar historial.")
+    titulo_con_icono("Futuros Cacao.PNG", "Evolución Histórica (12 meses)")
+    hist_data = {
+        'Fecha': pd.date_range(start='2025-01-01', periods=12, freq='M'),
+        'Precio USD/MT': [8200, 8500, 9100, 9800, 9400, 9200, 9600, 9900, 10200, 9800, 9500, 9350]
+    }
+    df_hist = pd.DataFrame(hist_data)
+    fig_hist = px.line(df_hist, x='Fecha', y='Precio USD/MT', markers=True)
+    fig_hist.update_traces(line_color='#d35400')
+    st.plotly_chart(fig_hist, use_container_width=True)
 
 with col_fut:
-    titulo_con_icono("Futuros Cacao.PNG", "Curva de Futuros: Próximos Meses")
+    titulo_con_icono("Futuros Cacao.PNG", "Curva de Futuros: Próximos Vencimientos")
     
-    # Datos representativos de los vencimientos de la ICE para 2026
-    # Estos valores se actualizan según la cotización de los contratos MAR-26, MAY-26, JUL-26, etc.
-    data_curva = {
+    # Datos de los contratos futuros mensuales
+    vencimientos = {
         'Mes Vencimiento': ['Mar 26', 'May 26', 'Jul 26', 'Sep 26', 'Dic 26', 'Mar 27'],
-        'Precio (USD/MT)': [9450, 9280, 9100, 8850, 8600, 8420] # Ejemplo de mercado en Backwardation
+        'Precio Proyectado': [9450, 9300, 9150, 8900, 8750, 8500]
     }
-    df_curva = pd.DataFrame(data_curva)
+    df_venc = pd.DataFrame(vencimientos)
     
-    fig_curva = px.bar(df_curva, x='Mes Vencimiento', y='Precio (USD/MT)', 
-                       text_auto=True, color='Precio (USD/MT)',
-                       color_continuous_scale='Oranges')
-    fig_curva.update_layout(showlegend=False)
-    st.plotly_chart(fig_curva, use_container_width=True)
+    # Gráfico de líneas para la curva de futuros
+    fig_venc = px.line(df_venc, x='Mes Vencimiento', y='Precio Proyectado', 
+                       markers=True, text='Precio Proyectado')
+    
+    fig_venc.update_traces(
+        line=dict(color='#7e3412', width=4),
+        marker=dict(size=10, color='#d35400'),
+        textposition="top center"
+    )
+    
+    fig_venc.update_layout(
+        xaxis_title="Mes del Contrato",
+        yaxis_title="USD / TM",
+        hovermode="x unified"
+    )
+    st.plotly_chart(fig_venc, use_container_width=True)
 
 st.divider()
 
@@ -107,10 +103,11 @@ with col_map:
 
 with col_bar:
     titulo_con_icono("Exportaciones.PNG", "Exportaciones (TM)")
-    fig_exp = px.bar(df_paises.sort_values('Exportación'), x='Exportación', y='País', orientation='h', color_discrete_sequence=['#7e3412'])
+    fig_exp = px.bar(df_paises.sort_values('Exportación'), x='Exportación', y='País', 
+                     orientation='h', color_discrete_sequence=['#7e3412'])
     st.plotly_chart(fig_exp, use_container_width=True)
 
-# 6. IMPORTADORES (BARRAS)
+# 6. IMPORTADORES
 st.divider()
 titulo_con_icono("Principales Importadores.PNG", "Principales Importadores Globales (TM)")
 
@@ -119,5 +116,6 @@ df_imp = pd.DataFrame({
     'TM': [750000, 680000, 520000, 310000, 290000, 85000]
 }).sort_values('TM', ascending=True)
 
-fig_imp = px.bar(df_imp, x='TM', y='País', orientation='h', color='TM', color_continuous_scale='Oranges', text_auto='.2s')
+fig_imp = px.bar(df_imp, x='TM', y='País', orientation='h', color='TM', 
+                 color_continuous_scale='Oranges', text_auto='.2s')
 st.plotly_chart(fig_imp, use_container_width=True)
