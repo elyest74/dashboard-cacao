@@ -8,7 +8,7 @@ import yfinance as yf
 st.set_page_config(layout="wide", page_title="Dashboard Cacao 2026")
 
 # 2. ENCABEZADO: LOGO Y TÍTULO
-# Nota: Si el archivo se llama diferente en tu GitHub, cambia 'logo_empresa.png'
+# Nota: Si el archivo se llama diferente en tu GitHub, cambia 'logo_corona_bp.png'
 col_logo, col_titulo = st.columns([1, 4])
 
 with col_logo:
