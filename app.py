@@ -31,7 +31,7 @@ with col_logo:
 
 with col_titulo:
     st.title("ESTRATEGIA GLOBAL DE COMPRAS: CACAO")
-    st.caption(f"Referencia: Informe 13/01/2026 | Datos BCE/Mercados: {datetime.now().strftime('%d/%m/%Y')}")
+    st.caption(f"Referencia: Informe 13/01/2026 | Fuente Precios: ICE London Cocoa")
 
 st.divider()
 
@@ -71,11 +71,11 @@ with col_bar:
     fig_exp.update_layout(height=350)
     st.plotly_chart(fig_exp, use_container_width=True)
 
-# 5. CONEXIÓN REFORZADA A MERCADOS
+# 5. CONEXIÓN A MERCADOS (BCE + ICE LONDON COCOA)
 st.divider()
 col_fx, col_cocoa = st.columns(2)
 
-@st.cache_data(ttl=3600) # Guarda los datos 1 hora para evitar bloqueos
+@st.cache_data(ttl=3600)
 def obtener_fx_bce():
     try:
         url = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip"
@@ -87,19 +87,17 @@ def obtener_fx_bce():
         return pd.DataFrame()
 
 @st.cache_data(ttl=3600)
-def descargar_datos_cacao():
+def descargar_datos_cacao_london():
     try:
-        # Usamos Ticker para mayor estabilidad
-        cacao = yf.Ticker("CC=F")
-        df = cacao.history(period="1y")
+        # C=F es el ticker para London Cocoa Futures (ICE)
+        df = yf.download("C=F", period="1y", interval="1d", progress=False, auto_adjust=True)
         if not df.empty:
             df = df.reset_index()
-            # Aplanamos MultiIndex si Yahoo lo envía
             if isinstance(df.columns, pd.MultiIndex):
                 df.columns = df.columns.get_level_values(0)
             return df
         return pd.DataFrame()
-    except Exception as e:
+    except:
         return pd.DataFrame()
 
 with col_fx:
@@ -113,16 +111,15 @@ with col_fx:
         st.error("Error al conectar con el BCE.")
 
 with col_cocoa:
-    titulo_con_icono("Futuros Cacao.PNG", "Precio Cacao (ICE US Cocoa)")
-    df_cc = descargar_datos_cacao()
+    titulo_con_icono("Futuros Cacao.PNG", "Precio Cacao (ICE London Cocoa)")
+    df_cc = descargar_datos_cacao_london()
     if not df_cc.empty:
+        # Nota: London Cocoa cotiza habitualmente en GBP, Yahoo hace la conversión o muestra el ticker base
         fig_cc = px.area(df_cc, x='Date', y='Close')
         fig_cc.update_traces(line_color='#d35400', fillcolor='rgba(211, 84, 0, 0.2)')
         st.plotly_chart(fig_cc, use_container_width=True)
     else:
-        # MENSAJE DE SEGURIDAD SI TODO FALLA
-        st.warning("⚠️ Servicio de datos saturado. Mostrando última referencia conocida: ~9,200 USD/MT")
-        st.info("Sugerencia: Haz clic en el menú superior derecho de la app y selecciona 'Clear Cache' para reintentar.")
+        st.warning("⚠️ Datos de ICE London no disponibles. El mercado puede estar cerrado.")
 
 # 6. IMPORTADORES
 st.divider()
