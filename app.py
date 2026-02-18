@@ -12,7 +12,7 @@ st.markdown("""
     <style>
     .titulo-central {
         color: #800000;
-        font-size: 60px; /* Tamaño aumentado para impacto máximo */
+        font-size: 150px; /* Tamaño aumentado para impacto máximo */
         font-weight: 900; /* Extra negrita */
         text-align: center;
         margin-top: -20px;
