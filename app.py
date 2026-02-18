@@ -48,7 +48,6 @@ col_hist, col_fut = st.columns(2)
 
 with col_hist:
     titulo_con_icono("Futuros Cacao.PNG", "Histórico de Precios (USD/MT)")
-    # Datos históricos proyectados/reales
     hist_data = {
         'Fecha': pd.date_range(start='2025-01-01', periods=12, freq='ME'),
         'Precio USD/MT': [8200, 8500, 9100, 9800, 9400, 9200, 9600, 9900, 10200, 9800, 9500, 9350]
@@ -61,7 +60,6 @@ with col_hist:
 
 with col_fut:
     titulo_con_icono("Futuros Cacao.PNG", "Mercado de Futuros (USD/MT)")
-    # Curva de futuros (Vencimientos mensuales)
     vencimientos = {
         'Mes Vencimiento': ['Mar 26', 'May 26', 'Jul 26', 'Sep 26', 'Dic 26', 'Mar 27'],
         'Precio Proyectado': [9450, 9300, 9150, 8900, 8750, 8500]
@@ -90,16 +88,17 @@ df_productores = pd.DataFrame({
 })
 
 with col_prod:
-    st.subheader("📍 Producción Mundial y Geografía")
-    # Configuración del Globo Terráqueo
+    # Título actualizado según tu solicitud
+    st.subheader("📍 Países donde se concentra la producción")
+    
     fig_map = px.choropleth(df_productores, 
                            locations="ISO", 
                            color="Producción", 
                            color_continuous_scale="Oranges",
-                           projection="orthographic") # Efecto de globo
+                           projection="orthographic")
     
     fig_map.update_geos(
-        projection_rotation=dict(lon=0, lat=10, roll=0), # Centrado en África/Atlántico
+        projection_rotation=dict(lon=0, lat=10, roll=0),
         showocean=True, oceancolor="#e8f4f8",
         showcountries=True, countrycolor="#cccccc"
     )
