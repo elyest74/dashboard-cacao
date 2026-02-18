@@ -29,7 +29,7 @@ with col_logo:
 
 with col_titulo:
     st.title("ESTRATEGIA GLOBAL DE COMPRAS: CACAO")
-    st.caption(f"Referencia: ICE London / NY | Proyección de Vencimientos Mensuales 2026")
+    st.caption(f"Referencia: ICE London / NY | Monitoreo de Mercado 2026")
 
 st.divider()
 
@@ -42,11 +42,12 @@ with k4: st.metric("Importación UE", "1.10M TM", "+0.5%")
 
 st.divider()
 
-# 4. MERCADOS: HISTÓRICO Y CURVA DE FUTUROS (LÍNEAS)
+# 4. MERCADOS: HISTÓRICO Y MERCADO DE FUTUROS (LÍNEAS)
 col_hist, col_fut = st.columns(2)
 
 with col_hist:
-    titulo_con_icono("Futuros Cacao.PNG", "Evolución Histórica (12 meses)")
+    # Cambio de nombre solicitado
+    titulo_con_icono("Futuros Cacao.PNG", "Histórico de Precios (USD/MT)")
     hist_data = {
         'Fecha': pd.date_range(start='2025-01-01', periods=12, freq='M'),
         'Precio USD/MT': [8200, 8500, 9100, 9800, 9400, 9200, 9600, 9900, 10200, 9800, 9500, 9350]
@@ -54,10 +55,12 @@ with col_hist:
     df_hist = pd.DataFrame(hist_data)
     fig_hist = px.line(df_hist, x='Fecha', y='Precio USD/MT', markers=True)
     fig_hist.update_traces(line_color='#d35400')
+    fig_hist.update_layout(xaxis_title="Meses anteriores", yaxis_title="Precio (USD/MT)")
     st.plotly_chart(fig_hist, use_container_width=True)
 
 with col_fut:
-    titulo_con_icono("Futuros Cacao.PNG", "Curva de Futuros: Próximos Vencimientos")
+    # Cambio de nombre solicitado
+    titulo_con_icono("Futuros Cacao.PNG", "Mercado de Futuros (USD/MT)")
     
     # Datos de los contratos futuros mensuales
     vencimientos = {
@@ -66,7 +69,7 @@ with col_fut:
     }
     df_venc = pd.DataFrame(vencimientos)
     
-    # Gráfico de líneas para la curva de futuros
+    # Gráfico de líneas solicitado
     fig_venc = px.line(df_venc, x='Mes Vencimiento', y='Precio Proyectado', 
                        markers=True, text='Precio Proyectado')
     
@@ -77,8 +80,8 @@ with col_fut:
     )
     
     fig_venc.update_layout(
-        xaxis_title="Mes del Contrato",
-        yaxis_title="USD / TM",
+        xaxis_title="Vencimientos Futuros",
+        yaxis_title="Precio (USD/MT)",
         hovermode="x unified"
     )
     st.plotly_chart(fig_venc, use_container_width=True)
@@ -89,33 +92,4 @@ st.divider()
 col_map, col_bar = st.columns([2, 1])
 
 df_paises = pd.DataFrame({
-    'ISO': ['CIV', 'GHA', 'IDN', 'NGA', 'CMR', 'BRA', 'ECU'],
-    'País': ['Costa de Marfil', 'Ghana', 'Indonesia', 'Nigeria', 'Camerún', 'Brasil', 'Ecuador'],
-    'Producción': [2100000, 800000, 650000, 300000, 280000, 200000, 150000],
-    'Exportación': [1650000, 620000, 410000, 210000, 190000, 10000, 145000]
-})
-
-with col_map:
-    st.subheader("📍 Producción Mundial por País (TM)")
-    fig_map = px.choropleth(df_paises, locations="ISO", color="Producción", color_continuous_scale="Oranges")
-    fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=350)
-    st.plotly_chart(fig_map, use_container_width=True)
-
-with col_bar:
-    titulo_con_icono("Exportaciones.PNG", "Exportaciones (TM)")
-    fig_exp = px.bar(df_paises.sort_values('Exportación'), x='Exportación', y='País', 
-                     orientation='h', color_discrete_sequence=['#7e3412'])
-    st.plotly_chart(fig_exp, use_container_width=True)
-
-# 6. IMPORTADORES
-st.divider()
-titulo_con_icono("Principales Importadores.PNG", "Principales Importadores Globales (TM)")
-
-df_imp = pd.DataFrame({
-    'País': ['Países Bajos', 'EE.UU.', 'Alemania', 'Bélgica', 'Malasia', 'España'],
-    'TM': [750000, 680000, 520000, 310000, 290000, 85000]
-}).sort_values('TM', ascending=True)
-
-fig_imp = px.bar(df_imp, x='TM', y='País', orientation='h', color='TM', 
-                 color_continuous_scale='Oranges', text_auto='.2s')
-st.plotly_chart(fig_imp, use_container_width=True)
+    'ISO': ['CIV', 'GHA', 'IDN', 'N
