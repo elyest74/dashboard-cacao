@@ -31,7 +31,7 @@ with col_logo:
 
 with col_titulo:
     st.title("ESTRATEGIA GLOBAL DE COMPRAS: CACAO")
-    st.caption(f"Referencia: Informe 13/01/2026 | Datos de Mercado: {datetime.now().strftime('%d/%m/%Y')}")
+    st.caption(f"Referencia: Informe 13/01/2026 | Datos BCE/Yahoo: {datetime.now().strftime('%d/%m/%Y')}")
 
 st.divider()
 
@@ -71,13 +71,29 @@ with col_bar:
     fig_exp.update_layout(height=350)
     st.plotly_chart(fig_exp, use_container_width=True)
 
-# 5. CONEXIÓN A MERCADOS
+# 5. CONEXIÓN A MERCADOS (NUEVA CONEXIÓN BCE)
 st.divider()
 col_fx, col_cocoa = st.columns(2)
 
-def descargar_datos_limpios(ticker):
+# Función para extraer EUR/USD del Banco Central Europeo
+def obtener_fx_bce():
     try:
-        df = yf.download(ticker, period="1y", interval="1d", progress=False, auto_adjust=True)
+        # URL del histórico del BCE (CSV)
+        url = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip"
+        df = pd.read_csv(url, compression='zip')
+        # Filtramos fecha y USD
+        df_usd = df[['Date', 'USD']].copy()
+        df_usd['Date'] = pd.to_datetime(df_usd['Date'])
+        # Filtramos último año y ordenamos
+        df_usd = df_usd.sort_values('Date').tail(260) 
+        return df_usd
+    except:
+        return pd.DataFrame()
+
+# Función para extraer Cacao (Yahoo)
+def descargar_cacao():
+    try:
+        df = yf.download("CC=F", period="1y", interval="1d", progress=False, auto_adjust=True)
         if not df.empty:
             df = df.reset_index()
             if isinstance(df.columns, pd.MultiIndex):
@@ -88,24 +104,24 @@ def descargar_datos_limpios(ticker):
         return pd.DataFrame()
 
 with col_fx:
-    titulo_con_icono("Cambio USD EUR.PNG", "Tasa de Cambio EUR/USD")
-    df_fx = descargar_datos_limpios("EURUSD=X")
+    titulo_con_icono("Cambio USD EUR.PNG", "Tasa de Cambio EUR/USD (Fuente: BCE)")
+    df_fx = obtener_fx_bce()
     if not df_fx.empty:
-        fig_fx = px.line(df_fx, x='Date', y='Close')
+        fig_fx = px.line(df_fx, x='Date', y='USD', labels={'USD': 'Tipo de Cambio', 'Date': 'Fecha'})
         fig_fx.update_traces(line_color='#2E86C1')
         st.plotly_chart(fig_fx, use_container_width=True)
     else:
-        st.warning("⚠️ Conexión temporal inactiva con divisas.")
+        st.warning("⚠️ Error al conectar con el BCE. Intentando alternativa...")
 
 with col_cocoa:
-    titulo_con_icono("Futuros Cacao.PNG", "Precio Futuros Cacao")
-    df_cc = descargar_datos_limpios("CC=F")
+    titulo_con_icono("Futuros Cacao.PNG", "Precio Futuros Cacao (Yahoo)")
+    df_cc = descargar_cacao()
     if not df_cc.empty:
-        fig_cc = px.area(df_cc, x='Date', y='Close')
+        fig_cc = px.area(df_cc, x='Date', y='Close', labels={'Close': 'USD/MT', 'Date': 'Fecha'})
         fig_cc.update_traces(line_color='#d35400', fillcolor='rgba(211, 84, 0, 0.2)')
         st.plotly_chart(fig_cc, use_container_width=True)
     else:
-        st.error("No se pudieron extraer precios de futuros.")
+        st.error("Error en conexión con futuros de Cacao.")
 
 # 6. IMPORTADORES
 st.divider()
