@@ -35,6 +35,7 @@ st.markdown("""
         line-height: 1;
         letter-spacing: -2px;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-transform: uppercase;
     }
     .subtitulo-inteligencia {
         color: #555555;
@@ -75,12 +76,13 @@ st.markdown(f"""
 
 st.divider()
 
-# 3. KPIs GLOBALES
-k1, k2, k3, k4 = st.columns(4)
-with k1: st.metric("Stocks Globales (USDA)", "1.35M TM", "-4.2%")
-with k2: st.metric("Consumo Mundial", "4.85M TM", "+1.8%")
-with k3: st.metric("Exportaciones Globales", "4.20M TM", "-2.1%")
-with k4: st.metric("Importación UE", "1.10M TM", "+0.5%")
+# 3. KPIs GLOBALES (Incluyendo Tasa de Cambio)
+k1, k2, k3, k4, k5 = st.columns(5)
+with k1: st.metric("Tasa de Cambio (COP/USD)", "4,050.25", "+0.8%")
+with k2: st.metric("Stocks Globales (USDA)", "1.35M TM", "-4.2%")
+with k3: st.metric("Consumo Mundial", "4.85M TM", "+1.8%")
+with k4: st.metric("Exportaciones Globales", "4.20M TM", "-2.1%")
+with k5: st.metric("Importación UE", "1.10M TM", "+0.5%")
 
 st.divider()
 
